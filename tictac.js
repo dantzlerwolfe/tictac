@@ -17,7 +17,7 @@ function runGame() {
       currentPlayer = players[Math.round(Math.random())];
       gameStatus = "playing";
     }
-    messenger.textContent = currentPlayer + "\'s turn. Click on desired square.";
+    messenger.textContent = currentPlayer + "\'s turn. Click on the desired square.";
   }
 
   function switchPlayer () {
@@ -39,11 +39,11 @@ function runGame() {
     var sumsLength = winningSums.length;
     for(var i = 0; i < sumsLength; i++) {
       if (winningSums[i] == 3) {
-        messenger.textContent = "X wins! Refresh page to play again.";
+        messenger.textContent = "X wins! Refresh the page to play again.";
         gameStatus = "won";
         return undefined;
       } else if (winningSums[i] == -3) {
-        messenger.textContent = "O wins! Refresh page to play again.";
+        messenger.textContent = "O wins! Refresh the page to play again.";
         gameStatus = "won";
         return undefined;
       } else gameStatus = "playing";
@@ -76,10 +76,10 @@ function runGame() {
     } else if (gameStatus == "playing" && turnCount < 9) {
       switchPlayer();
       turnPrompt();
-    } else if (turnCount => 9) {
+    } else if (turnCount >= 9) {
       console.log(turnCount);
       gameStatus = "draw";
-      messenger.textContent = "It's a draw! Refresh page to play again.";
+      messenger.textContent = "It's a draw! Refresh the page to play again.";
     }
   }
   turnPrompt();
