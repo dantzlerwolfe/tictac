@@ -59,12 +59,6 @@ function runGame() {
     else return compStrat();
   }
 
-  // function sumConnect () {
-  //   connectedSums = [winningSums[]
-
-  //   ]
-  // }
-
   function tryTurn (event) {
     if (!gridImage[event.target.id]) {
       takeTurn(event);
