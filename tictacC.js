@@ -59,7 +59,7 @@ function runGame() {
     else return compStrat();
   }
 
-  function tryTurn (event) {
+  function tryTurn(event) {
     if (!gridImage[event.target.id]) {
       takeTurn(event);
     } else {

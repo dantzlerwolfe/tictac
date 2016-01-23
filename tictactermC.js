@@ -3,7 +3,7 @@ function runInConsole() {
               " "," "," ",
               " "," "," "];
   var gridImage = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-  var players = ["O","X"];
+  var players = ["Computer","Human"];
   var turnCount = 0;
   var gameStatus = "new"
   var currentPlayer;
@@ -30,8 +30,10 @@ function runInConsole() {
       currentPlayer = players[Math.round(Math.random())];
       gameStatus = "playing";
     }
-    currentMove = prompt(currentPlayer + "\'s turn. Enter desired square.");
-    tryTurn(currentMove);
+    if (currentPlayer == players[1]) {
+      currentMove = prompt(currentPlayer + "\'s turn. Enter desired square.");
+      tryTurn(currentMove);
+    } else if (currentPlayer == players[0]) takeTurn();
   }
 
   function gridMapper(coordinates) {
@@ -85,7 +87,13 @@ function runInConsole() {
     }
   }
 
-  function tryTurn (move) {
+  function compStrat () {
+    var selection = Math.round(8 * Math.random());
+    if (!gridImage[selection]) return selection;
+    else return compStrat();
+  }
+
+  function tryTurn(move) {
     if(gridMapper(move) == null) return null;
     currentMove = gridMapper(move);
     if (!gridImage[currentMove]) {
@@ -97,13 +105,15 @@ function runInConsole() {
   }
 
   function takeTurn(move) {
+    var compMove;
     if (currentPlayer == players[1]) {
       gridImage[move] = 1;
-      grid[move] = players[1];
+      grid[move] = "X";
       turnCount++;
     } else if (currentPlayer == players[0]) {
-      gridImage[move] = -1;
-      grid[move] = players[0];
+      compMove = compStrat();
+      gridImage[compMove] = -1;
+      grid[compMove] = "O";
       turnCount++;
     }
     drawGrid();
