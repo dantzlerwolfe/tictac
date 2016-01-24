@@ -10,7 +10,7 @@ function runGame() {
   var computerGo = null;
 
   grid.addEventListener("click", function (event) { 
-    tryTurn(event);
+    if (gameStatus != "won") tryTurn(event);
   }, false);
 
   function turnPrompt () {
@@ -20,7 +20,7 @@ function runGame() {
       gameStatus = "playing";
     }
     messenger.textContent = currentPlayer + "\'s turn. Click on the desired square.";
-    if (currentPlayer == players[0]) takeTurn();
+    if (currentPlayer == players[0] && gameStatus != "won") takeTurn();
   }
 
   function switchPlayer () {
@@ -54,9 +54,121 @@ function runGame() {
   }
 
   function compStrat () {
-    var selection = Math.round(8 * Math.random());
-    if (!gridImage[selection]) return selection;
-    else return compStrat();
+    var selection
+    var openSq = everyTime(gridImage, 0);
+    // Inital square ranks
+    var initialSqRanks = [3, 2, 3, 2, 4, 2, 3, 2, 3];
+    // Make initial move.
+    if (openSq.length == 9) {
+      return firstMoves();
+    }
+    // List indices of all winningSums associated with a given square.
+    console.log(winningSums);
+    var winSumIndex = [
+      [0, 3, 6],
+      [0, 4],
+      [0, 5, 7],
+      [1, 3],
+      [1, 4, 6, 7],
+      [1, 5],
+      [2, 3, 7],
+      [2, 4],
+      [2, 5, 6]
+    ]
+    // List all winningSums associated with each square.
+    var winSums = function () {
+      var outerLength = winSumIndex.length;
+      var innerLength;
+      var sums = [];
+      for (var i = 0; i < outerLength; i++) {
+        innerLength = winSumIndex[i].length;
+        sums[i] = [];
+        for (var j = 0; j < innerLength; j++) {
+          sums[i].push(winningSums[winSumIndex[i][j]]);
+        }
+      }
+      return sums;
+    }();
+    console.log(winSums);
+    // Calculate new square ranks based on winSums.
+    var newSqRanks = function () {
+      var ranks = [];
+      winSums.forEach(function (element) {
+        ranks.push(arraySum(element));
+      });
+      return ranks;
+    }();
+    // Test for win.
+    function selfWin() {
+      // use winSums to see if there are any -2s associated with a given square.
+      var wsLength = winSums.length
+      var winners = [];
+      for (i = 0; i < wsLength; i++) {
+        if (arrayMin(winSums[i]) == -2 && gridImage[i] == 0) winners.push(i)
+      }
+      var randomIndex = Math.floor(Math.random() * (winners.length));
+      if (winners.length) return winners[randomIndex];
+        else return null;
+    }
+    // Test for opponent win.
+    function opponentWin() {
+      var wsLength = winSums.length
+      var losers = [];
+      for (i = 0; i < wsLength; i++) {
+        if (arrayMax(winSums[i]) == 2 && gridImage[i] == 0) losers.push(i)
+      }
+      var randomIndex = Math.floor(Math.random() * (losers.length));
+      if (losers.length) return losers[randomIndex];
+        else return null;
+    }
+    // Test for forks (note this won't work if we don't first 
+    // filter for winning moves). We'd have to add a second condition
+    // to make sure that we only counted forks and not winners.
+    function forkTest () {
+      for(var i = 0; i < newSqRanks.length; i++) {
+        if (newSqRanks[i] == -2 && gridImage[i] == 0) return i;
+      }
+      return null;
+    }
+    // Test for pins.
+    function pinTest () {
+      for(var i = 0; i < newSqRanks.length; i++) {
+        if (newSqRanks[i] == -1 && gridImage[i] == 0) return i;
+      }
+      return null;
+    }
+    // Make initial move.
+    function firstMoves () {
+      var maxRank = 0;
+      var testValue;
+      var oLength = openSq.length;
+      var moveOptions = [];
+      for (var i = 0; i < oLength; i++) {
+        testValue = initialSqRanks[openSq[i]];
+        if (testValue >= maxRank && gridImage[openSq[i]] == 0) 
+          maxRank = testValue;
+          moveOptions.push(openSq[i]);
+      }
+      var randomIndex = Math.floor(Math.random() * (moveOptions.length))
+      return moveOptions[randomIndex];
+    }
+    // 
+
+    // STRATEGIC RULES
+    // Test for winning move.
+    if ((selection = selfWin()) != null) return selection;
+      // Test for opponent win.
+      else if ((selection = opponentWin()) != null) return selection;
+      // Test for a fork.
+      else if ((selection = forkTest()) != null) return selection;
+      // Test for a pin.
+      else if ((selection = pinTest()) != null) return selection;
+      // Make initial move (if after Human)
+      else if ((selection = firstMoves()) != null) return selection;
+      // 
+
+    // if (!gridImage[selection]) return selection;
+    // else return compStrat();
   }
 
   function tryTurn(event) {
@@ -93,5 +205,37 @@ function runGame() {
       messenger.textContent = "It's a draw! Refresh the page to play again.";
     }
   }
+
+  /*************/
+  /* UTILITIES */
+  /*************/
+
+  // Return all occurrences of an element in an array.
+  function everyTime (array, element) {
+    var hits = [];
+    for (var i = 0; i < array.length; i++) {
+      if (array[i] == element) hits.push(i);
+    }
+    return hits;
+  }
+
+  // Get max value of an array.
+  function arrayMax (numArray) {
+    return Math.max.apply(null, numArray);
+  }
+
+  // Get min value of an array.
+  function arrayMin (numArray) {
+    return Math.min.apply(null, numArray);
+  }
+
+  // Sum over an array.
+  function arraySum (numArray) {
+    return numArray.reduce(function(preV, curV, curI, arr) {
+      return preV + curV;
+    })
+  }
+
+
   turnPrompt();
 }
